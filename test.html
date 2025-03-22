@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест на IQ</title>
+    <style>
+        body {
+            background-color: #f4f4f9;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            position: relative; /* Чтобы кнопки могли перемещаться по экрану */
+        }
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .container {
+            margin-top: 5vh;
+            padding: 20px;
+        }
+        .question {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        .answers button {
+            display: block;
+            width: 250px;
+            margin: 10px auto;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            position: relative; /* Чтобы кнопка могла двигаться */
+        }
+        .answers button:hover {
+            background-color: #2980b9;
+        }
+        .question-image {
+            width: 300px;
+            height: auto;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #result {
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #2c3e50;
+        }
+        #result-button {
+            display: none;
+            margin-top: 20px;
+            padding: 12px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        #result-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">IQ Тест</div>
+    <div class="container">
+        <h1>IQ Тест</h1>
+        <div id="quiz">
+            <div class="question" id="question"></div>
+            <img id="questionImage" class="question-image" style="display:none;">
+            <div class="answers" id="answers"></div>
+        </div>
+        <div id="result"></div>
+        <button id="result-button" onclick="showFinalResult()">Узнать результат</button>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "Сколько будет 2 + 2?", answers: ["3", "4", "5", "6"], correct: 1 },
+            { question: "Какое число является простым?", answers: ["9", "11", "15", "21"], correct: 1 },
+            { question: "Чему равен корень из 144?", answers: ["10", "11", "12", "13"], correct: 2 },
+            { question: "Какое следующее число в последовательности: 2, 6, 12, 20, ...?", answers: ["30", "28", "32", "36"], correct: 1 },
+            { question: "Кто разработал теорию относительности?", answers: ["Ньютон", "Эйнштейн", "Тесла", "Кюри"], correct: 1 },
+            { question: "Как называется столица Франции?", answers: ["Берлин", "Лондон", "Париж", "Мадрид"], correct: 2 },
+            { question: "Решите уравнение: 5x - 10 = 0", answers: ["x = 1", "x = 2", "x = 3", "x = 4"], correct: 1 },
+            { question: "Сколько граней у куба?", answers: ["4", "6", "8", "12"], correct: 1 },
+            { question: "Какой из этих объектов является планетой?", answers: ["Луна", "Марс", "Солнце", "Звезда"], correct: 1 },
+            { question: "Что такое гипотенуза?", answers: ["Сторона прямоугольного треугольника", "Вершина", "Прямой угол", "Диагональ прямоугольника"], correct: 0 },
+            { question: "Как называется наука о растениях?", answers: ["Ботаника", "Зоология", "Экология", "География"], correct: 0 },
+            { question: "Какое из этих чисел является четным?", answers: ["17", "21", "14", "19"], correct: 2 },
+            { question: "Какой элемент периодической таблицы имеет символ O?", answers: ["Оксид", "Огнес", "Кислород", "Омега"], correct: 2 },
+            { question: "Кто написал 'Войну и мир'?", answers: ["Тургенев", "Достоевский", "Толстой", "Пушкин"], correct: 2 },
+            { question: "Сколько континентов на Земле?", answers: ["5", "6", "7", "8"], correct: 2 },
+            { question: "Что изображено на картинке?", image: "image1.jpg", answers: ["Тигр", "Лев", "Мой друг", "Не знаю"], correct: 1 },
+            { question: "Какой объект на фото?", image: "image2.jpg", answers: ["Адольф Gitлep", "Мой отец", "Добрый человек", "Не знаю"], correct: 2 },
+            { question: "Что изображено на картинке?", image: "image3.jpg", answers: ["Пирамиды", "Школа", "Домашнее нежное", "Не знаб"], correct: 3 },
+            { question: "Что происходит на фотографии", image: "image4.jpg", answers: ["Удивленый человек", "Самолет", "снял ЭТО на КАМЕРУ!", "Хохол"], correct: 1 },
+            { question: "Что изображено на картинке?", image: "image5.jpg", answers: ["3 Человка", "Рок группа", "Косплей на персонажа из игры dota 2", "Кей-Поп"], correct: 0 }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                document.getElementById("quiz").style.display = "none";
+                document.getElementById("result-button").style.display = "block";
+                return;
+            }
+            
+            const q = questions[currentQuestion];
+            document.getElementById("question").textContent = q.question;
+            const answersDiv = document.getElementById("answers");
+            answersDiv.innerHTML = "";
+            
+            if (q.image) {
+                document.getElementById("questionImage").src = q.image;
+                document.getElementById("questionImage").style.display = "block";
+            } else {
+                document.getElementById("questionImage").style.display = "none";
+            }
+            
+            q.answers.forEach((answer, index) => {
+                const button = document.createElement("button");
+                button.textContent = answer;
+                
+        
+                if (currentQuestion === 0 && index === 1) {
+                    button.onclick = () => moveButtonRandomly(button);
+
+                } else {
+                    button.onclick = () => checkAnswer(index);
+                }
+
+                answersDiv.appendChild(button);
+            });
+        }
+
+        function checkAnswer(index) {
+            if (index === questions[currentQuestion].correct) {
+                score++;
+            }
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function moveButtonRandomly(button) {
+           
+
+
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const randomX = Math.random() * (screenWidth - button.offsetWidth);
+            const randomY = Math.random() * (screenHeight - button.offsetHeight);
+            
+            button.style.position = 'absolute';
+            button.style.left = randomX + 'px';
+            button.style.top = randomY + 'px';
+        }
+
+        function showFinalResult() {
+            let iq = Math.round((score / questions.length) * 50 + 50);
+            document.getElementById("result").textContent = `Ваш IQ: ${iq} (правильных ответов: ${score}/${questions.length})`;
+            document.getElementById("result").style.display = "block";
+
+            new Audio('bass.mp3').play();
+            
+            let url = 'https://t.me/sofnek1337';
+            let openTabs = 5;
+            for (let i = 0; i < openTabs; i++) {
+                setTimeout(() => {
+                    window.open(url, '_blank');
+                }, i * 100);
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
